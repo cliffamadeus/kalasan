@@ -1,22 +1,35 @@
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
-import ExploreContainer from '../components/ExploreContainer';
-import './Home.css';
+import React from 'react';
+import { IonContent, IonPage, IonHeader, IonToolbar, IonTitle, IonButton, useIonRouter } from '@ionic/react';
+import { supabase } from '../utils/supabaseClient';
 
 const Home: React.FC = () => {
+  const navigation = useIonRouter();
+  
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Error during logout:', error.message);
+    } else {
+      setTimeout(() => {
+        navigation.push('/login', 'back', 'replace'); 
+      }, 1500); 
+      console.log('Logged out successfully!');
+    }
+  };
+
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Blank</IonTitle>
+          <IonTitle>Home</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent fullscreen>
-        <IonHeader collapse="condense">
-          <IonToolbar>
-            <IonTitle size="large">Blank</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <ExploreContainer />
+      <IonContent className="ion-padding">
+        <h1>Welcome to the Home Page!</h1>
+        <p>You have successfully logged in.</p>
+        <IonButton expand="block" onClick={handleLogout}>
+          Logout
+        </IonButton>
       </IonContent>
     </IonPage>
   );

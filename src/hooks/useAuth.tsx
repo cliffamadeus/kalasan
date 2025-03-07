@@ -1,23 +1,34 @@
 import { useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useIonRouter } from '@ionic/react';
 import { supabase } from '../utils/supabaseClient';
 
 const useAuth = () => {
-  const history = useHistory();
+  const router = useIonRouter(); // Use Ion Router for navigation
 
   useEffect(() => {
-    // Set up the auth state listener
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+    // Check for an existing session on initial load
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        // User is signed in, redirect to /home
-        history.push('/home');
-      } else {
-        // User is signed out, redirect to /login
-        history.push('/login');
+        router.push('/home', 'forward'); // Navigate to home if session exists
       }
     });
 
-  }, [history]);
+    // Set up the auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        router.push('/home', 'forward'); // Navigate to home after login
+      } else {
+        router.push('/login', 'root'); // Navigate to login after logout
+      }
+    });
+
+    // Cleanup the listener when the component unmounts
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [router]);
+
+  return null;
 };
 
 export default useAuth;
